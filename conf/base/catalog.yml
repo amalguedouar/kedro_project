@@ -53,3 +53,22 @@ previous_application:
 application_bureau_prev:
   type: pandas.CSVDataSet
   filepath : data/04_feature/application_bureau_prev.csv
+
+pos_cash_balance:
+  type: pandas.CSVDataSet
+  filepath : data/01_raw/POS_CASH_balance.csv
+  layer : raw
+
+application_bureau_prev_cash:
+  type: pandas.CSVDataSet
+  filepath : data/04_feature/application_bureau_prev_cash.csv
+
+insta_payments:
+  type: pandas.CSVDataSet
+  filepath : data/01_raw/installments_payments.csv
+  layer : raw
+
+application_bureau_payments:
+  type: pandas.CSVDataSet
+  filepath : data/04_feature/application_bureau_payments.csv
+

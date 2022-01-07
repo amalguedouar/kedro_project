@@ -193,7 +193,7 @@ def create_application_bureau_prev(
     grp = previous_application[['SK_ID_CURR','SK_ID_PREV']].groupby(by=['SK_ID_CURR'])['SK_ID_PREV'].count().reset_index().rename(columns={'SK_ID_PREV':'PREV_APP_COUNT'})
     application_bureau_prev = application_bureau_fe.merge(grp, on =['SK_ID_CURR'], how = 'left')
     application_bureau_prev['PREV_APP_COUNT'] = application_bureau_prev['PREV_APP_COUNT'].fillna(0)
-    
+
     # Combining numerical features
     grp = previous_application.drop('SK_ID_PREV', axis =1).groupby(by=['SK_ID_CURR']).mean().reset_index()
     prev_columns = ['PREV_'+column if column != 'SK_ID_CURR' else column for column in grp.columns ]
@@ -208,6 +208,53 @@ def create_application_bureau_prev(
     grp = prev_categorical.groupby('SK_ID_CURR').mean().reset_index()
     grp.columns = ['PREV_'+column if column != 'SK_ID_CURR' else column for column in grp.columns]
     application_bureau_prev = application_bureau_prev.merge(grp, on=['SK_ID_CURR'], how='left')
+    application_bureau_prev.update(application_bureau_prev[grp.columns].fillna(0))
+
+    return application_bureau_prev
+
+
+def create_application_bureau_prev_cash(
+    pos_cash: pd.DataFrame, application_bureau_prev: pd.DataFrame) -> pd.DataFrame:
+    """Joining POS CASH balance data to application bureau prev data.
+    Args:
+        pos_cash: Input pos cash balance data.
+        application_bureau_prev: bureau application table merged with previous application data.
+    Returns:
+        application_bureau_prev merged with  POS CASH balance data.
+    """
+
+    # Combining numerical features
+    grp = pos_cash.drop('SK_ID_PREV', axis =1).groupby(by=['SK_ID_CURR']).mean().reset_index()
+    prev_columns = ['POS_'+column if column != 'SK_ID_CURR' else column for column in grp.columns ]
+    grp.columns = prev_columns
+    application_bureau_prev = application_bureau_prev.merge(grp, on =['SK_ID_CURR'], how = 'left')
+    application_bureau_prev.update(application_bureau_prev[grp.columns].fillna(0))
+
+    # Combining categorical features
+    pos_cash_categorical = pd.get_dummies(pos_cash.select_dtypes('object'))
+    pos_cash_categorical['SK_ID_CURR'] = pos_cash['SK_ID_CURR']
+    grp = pos_cash_categorical.groupby('SK_ID_CURR').mean().reset_index()
+    grp.columns = ['POS_'+column if column != 'SK_ID_CURR' else column for column in grp.columns]
+    application_bureau_prev = application_bureau_prev.merge(grp, on=['SK_ID_CURR'], how='left')
+    application_bureau_prev.update(application_bureau_prev[grp.columns].fillna(0))
+
+    return application_bureau_prev
+
+def create_application_bureau_payments(insta_payments: pd.DataFrame, create_application_bureau_prev_cash: pd.DataFrame) -> pd.DataFrame:
+    """Joining Installments Payments data to application_bureau_prev_data.
+
+    Args:
+        insta_payments: Input insta payments data.
+        application_bureau_prev: bureau application table merged with previous application data.
+    Returns:
+        create_application_bureau_prev_cash merged with insta payments data.
+    """
+
+    # Combining numerical features and there are no categorical features in this dataset
+    grp = insta_payments.drop('SK_ID_PREV', axis =1).groupby(by=['SK_ID_CURR']).mean().reset_index()
+    prev_columns = ['INSTA_'+column if column != 'SK_ID_CURR' else column for column in grp.columns ]
+    grp.columns = prev_columns
+    application_bureau_prev = create_application_bureau_prev_cash.merge(grp, on =['SK_ID_CURR'], how = 'left')
     application_bureau_prev.update(application_bureau_prev[grp.columns].fillna(0))
 
     return application_bureau_prev

@@ -1,7 +1,7 @@
 
 from kedro.pipeline import Pipeline, node
 
-from .nodes import limit_size, add_income_gt_credit_flag, add_credit_income_percent, add_annuity_income_percent, add_credit_term, add_days_deployed_percent, create_application_bureau_data, feature_engineering_bureau_application, create_application_bureau_prev
+from .nodes import limit_size, add_income_gt_credit_flag, add_credit_income_percent, add_annuity_income_percent, add_credit_term, add_days_deployed_percent, create_application_bureau_data, feature_engineering_bureau_application, create_application_bureau_prev, create_application_bureau_prev_cash, create_application_bureau_payments
 
 def create_pipeline(**kwargs):
     return Pipeline(
@@ -59,6 +59,18 @@ def create_pipeline(**kwargs):
                 inputs=["previous_application", "application_bureau_fe"],
                 outputs="application_bureau_prev",
                 name="create_application_bureau_prev",
+            ),
+                node(
+                func=create_application_bureau_prev_cash,
+                inputs=["pos_cash_balance", "application_bureau_prev"],
+                outputs="application_bureau_prev_cash",
+                name="create_application_bureau_prev_cash",
+            ),
+                node(
+                func=create_application_bureau_payments,
+                inputs=["insta_payments", "application_bureau_prev_cash"],
+                outputs="application_bureau_payments",
+                name="create__application_bureau_payments",
             ),
         ]
     )
