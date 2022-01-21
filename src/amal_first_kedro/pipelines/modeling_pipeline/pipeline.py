@@ -26,28 +26,25 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Project pipelines."""
-from typing import Dict
+"""
+This is a boilerplate pipeline 'modeling_pipeline'
+generated using Kedro 0.17.5
+"""
 
-from kedro.pipeline import Pipeline
-from amal_first_kedro.pipelines import data_engineering as de
-from amal_first_kedro.pipelines import modeling_pipeline as m
+from kedro.pipeline import Pipeline, node
+
+from amal_first_kedro.pipelines.modeling_pipeline.nodes import select_features
 
 
 
-def register_pipelines() -> Dict[str, Pipeline]:
-    """Register the project's pipelines.
-
-    Returns:
-        A mapping from a pipeline name to a ``Pipeline`` object.
-    """
-
-    data_engineering_pipeline =  de.create_pipeline()
-    modeling_pipeline = m.create_pipeline()
-
-    return {
-        "__default__": data_engineering_pipeline + modeling_pipeline,
-        "dp": data_engineering_pipeline,
-        "m": modeling_pipeline,
-    }
-
+def create_pipeline(**kwargs):
+    return Pipeline(
+        [
+            node(
+                func=select_features,
+                inputs=["X_train_final","y_train"],
+                outputs="selected_features",
+                name="model_pkl",
+            ),
+        ]
+    )

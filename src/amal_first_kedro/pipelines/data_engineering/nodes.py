@@ -1,5 +1,10 @@
 import pandas as pd
 import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import OneHotEncoder
+
 
 def limit_size(application_train_data: pd.DataFrame, size: int) -> pd.DataFrame:
     """Preprocesses the data for yellow tripdata.
@@ -258,3 +263,95 @@ def create_application_bureau_payments(insta_payments: pd.DataFrame, create_appl
     application_bureau_prev.update(application_bureau_prev[grp.columns].fillna(0))
 
     return application_bureau_prev
+
+def create_final_fe_application(credit_card_balance: pd.DataFrame, application_bureau_payments: pd.DataFrame) -> pd.DataFrame:
+    """Joining Credit card balance data to application_bureau_prev data.
+
+    Args:
+        credit_card_balance: Input credit card balance data.
+        application_bureau_payments: application table merged with application_bureau_payments.
+    Returns:
+        final feature engineering application data.
+    """
+
+    # Combining numerical features
+    grp = credit_card_balance.drop('SK_ID_PREV', axis =1).groupby(by=['SK_ID_CURR']).mean().reset_index()
+    prev_columns = ['CREDIT_'+column if column != 'SK_ID_CURR' else column for column in grp.columns ]
+    grp.columns = prev_columns
+    application_bureau_prev = application_bureau_payments.merge(grp, on =['SK_ID_CURR'], how = 'left')
+    application_bureau_prev.update(application_bureau_prev[grp.columns].fillna(0))
+
+    # Combining categorical features
+    credit_categorical = pd.get_dummies(credit_card_balance.select_dtypes('object'))
+    credit_categorical['SK_ID_CURR'] = credit_card_balance['SK_ID_CURR']
+    grp = credit_categorical.groupby('SK_ID_CURR').mean().reset_index()
+    grp.columns = ['CREDIT_'+column if column != 'SK_ID_CURR' else column for column in grp.columns]
+    application_bureau_prev = application_bureau_prev.merge(grp, on=['SK_ID_CURR'], how='left')
+    application_bureau_prev.update(application_bureau_prev[grp.columns].fillna(0))
+
+    return application_bureau_prev
+
+
+def divide_train_test_data(application_bureau_prev: pd.DataFrame, t_size:int):
+    """Dividing final data into train, valid and test datasets."""
+    y = application_bureau_prev.pop('TARGET').values
+    X_train, X_temp, y_train, y_temp = train_test_split(application_bureau_prev.drop(['SK_ID_CURR'],axis=1), y, stratify = y, test_size=t_size, random_state=42)
+    X_val, X_test, y_val, y_test = train_test_split(X_temp, y_temp, stratify = y_temp, test_size=0.5, random_state=42)
+    print('Shape of X_train:',X_train.shape)
+    print('Shape of X_val:',X_val.shape)
+    print('Shape of X_test:',X_test.shape)
+
+        # Seperation of columns into numeric and categorical columns
+    types = np.array([dt for dt in X_train.dtypes])
+    all_columns = X_train.columns.values
+    is_num = types != 'object'
+    num_cols = all_columns[is_num]
+    cat_cols = all_columns[~is_num]
+
+    # Featurization of numeric data
+    imputer_num = SimpleImputer(strategy='median')
+    X_train_num = imputer_num.fit_transform(X_train[num_cols])
+    X_val_num = imputer_num.transform(X_val[num_cols])
+    X_test_num = imputer_num.transform(X_test[num_cols])
+    scaler_num = StandardScaler()
+    X_train_num1 = scaler_num.fit_transform(X_train_num)
+    X_val_num1 = scaler_num.transform(X_val_num)
+    X_test_num1 = scaler_num.transform(X_test_num)
+    X_train_num_final = pd.DataFrame(X_train_num1, columns=num_cols)
+    X_val_num_final = pd.DataFrame(X_val_num1, columns=num_cols)
+    X_test_num_final = pd.DataFrame(X_test_num1, columns=num_cols)
+
+    # Featurization of categorical data
+    imputer_cat = SimpleImputer(strategy='constant', fill_value='MISSING')
+    X_train_cat = imputer_cat.fit_transform(X_train[cat_cols])
+    X_val_cat = imputer_cat.transform(X_val[cat_cols])
+    X_test_cat = imputer_cat.transform(X_test[cat_cols])
+    X_train_cat1= pd.DataFrame(X_train_cat, columns=cat_cols)
+    X_val_cat1= pd.DataFrame(X_val_cat, columns=cat_cols)
+    X_test_cat1= pd.DataFrame(X_test_cat, columns=cat_cols)
+    ohe = OneHotEncoder(sparse=False,handle_unknown='ignore')
+    X_train_cat2 = ohe.fit_transform(X_train_cat1)
+    X_val_cat2 = ohe.transform(X_val_cat1)
+    X_test_cat2 = ohe.transform(X_test_cat1)
+    cat_cols_ohe = list(ohe.get_feature_names(input_features=cat_cols))
+    X_train_cat_final = pd.DataFrame(X_train_cat2, columns = cat_cols_ohe)
+    X_val_cat_final = pd.DataFrame(X_val_cat2, columns = cat_cols_ohe)
+    X_test_cat_final = pd.DataFrame(X_test_cat2, columns = cat_cols_ohe)
+
+    # Final complete data
+    X_train_final = pd.concat([X_train_num_final,X_train_cat_final], axis = 1)
+    X_val_final = pd.concat([X_val_num_final,X_val_cat_final], axis = 1)
+    X_test_final = pd.concat([X_test_num_final,X_test_cat_final], axis = 1)
+    print(X_train_final.shape)
+    print(X_val_final.shape)
+    print(X_test_final.shape)
+
+    y = pd.DataFrame(y)
+    y_train = pd.DataFrame(y_train)
+    y_val = pd.DataFrame(y_val)
+    y_test = pd.DataFrame(y_test)
+
+    return X_train_final, X_val_final, X_test_final, y, y_train, y_val, y_test
+
+
+

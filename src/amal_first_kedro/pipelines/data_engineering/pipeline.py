@@ -1,7 +1,7 @@
 
 from kedro.pipeline import Pipeline, node
 
-from .nodes import limit_size, add_income_gt_credit_flag, add_credit_income_percent, add_annuity_income_percent, add_credit_term, add_days_deployed_percent, create_application_bureau_data, feature_engineering_bureau_application, create_application_bureau_prev, create_application_bureau_prev_cash, create_application_bureau_payments
+from .nodes import limit_size, add_income_gt_credit_flag, add_credit_income_percent, add_annuity_income_percent, add_credit_term, add_days_deployed_percent, create_application_bureau_data, feature_engineering_bureau_application, create_application_bureau_prev, create_application_bureau_prev_cash, create_application_bureau_payments, create_final_fe_application, divide_train_test_data
 
 def create_pipeline(**kwargs):
     return Pipeline(
@@ -70,7 +70,19 @@ def create_pipeline(**kwargs):
                 func=create_application_bureau_payments,
                 inputs=["insta_payments", "application_bureau_prev_cash"],
                 outputs="application_bureau_payments",
-                name="create__application_bureau_payments",
+                name="create_application_bureau_payments",
+            ),
+                node(
+                func=create_final_fe_application,
+                inputs=["credit_card_balance", "application_bureau_payments"],
+                outputs="final_fe_application",
+                name="create_final_fe_application",
+            ),
+            node(
+                func=divide_train_test_data,
+                inputs=["final_fe_application","params:test_size"],
+                outputs=["X_train_final", "X_val_final", "X_test_final", "y", "y_train", "y_val", "y_test"],
+                name="divide_train_test_data",
             ),
         ]
     )

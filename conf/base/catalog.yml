@@ -72,3 +72,48 @@ application_bureau_payments:
   type: pandas.CSVDataSet
   filepath : data/04_feature/application_bureau_payments.csv
 
+credit_card_balance:
+  type: pandas.CSVDataSet
+  filepath : data/01_raw/credit_card_balance.csv
+  layer : raw
+
+final_fe_application:
+  type: pandas.CSVDataSet
+  filepath : data/04_feature/final_fe_application.csv
+
+X_train_final:
+  type: pandas.CSVDataSet
+  filepath : data/05_model_input/X_train_final.csv
+
+X_val_final:
+  type: pandas.CSVDataSet
+  filepath : data/05_model_input/X_val_final_val.csv
+
+X_test_final:
+  type: pandas.CSVDataSet
+  filepath : data/05_model_input/X_test_final.csv
+
+
+y:
+  type: pandas.CSVDataSet
+  filepath : data/05_model_input/y.csv
+
+y_train:
+  type: pandas.CSVDataSet
+  filepath : data/05_model_input/y_train.csv
+
+y_val:
+  type: pandas.CSVDataSet
+  filepath : data/05_model_input/y_val.csv
+
+y_test:
+  type: pandas.CSVDataSet
+  filepath : data/05_model_input/y_test.csv
+
+selected_features:
+  type: pickle.PickleDataSet
+  filepath : data/06_models/selected_features.pickle
+
+
+
+

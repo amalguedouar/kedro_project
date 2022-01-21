@@ -25,29 +25,12 @@
 #
 # See the License for the specific language governing permissions and
 # limitations under the License.
+"""
+This is a boilerplate test file for pipeline 'modeling_pipeline'
+generated using Kedro 0.17.5.
+Please add your pipeline tests here.
 
-"""Project pipelines."""
-from typing import Dict
-
-from kedro.pipeline import Pipeline
-from amal_first_kedro.pipelines import data_engineering as de
-from amal_first_kedro.pipelines import modeling_pipeline as m
-
-
-
-def register_pipelines() -> Dict[str, Pipeline]:
-    """Register the project's pipelines.
-
-    Returns:
-        A mapping from a pipeline name to a ``Pipeline`` object.
-    """
-
-    data_engineering_pipeline =  de.create_pipeline()
-    modeling_pipeline = m.create_pipeline()
-
-    return {
-        "__default__": data_engineering_pipeline + modeling_pipeline,
-        "dp": data_engineering_pipeline,
-        "m": modeling_pipeline,
-    }
-
+Kedro recommends using `pytest` framework, more info about it can be found
+in the official documentation:
+https://docs.pytest.org/en/latest/getting-started.html
+"""
