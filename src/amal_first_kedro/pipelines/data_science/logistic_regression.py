@@ -89,7 +89,7 @@ def predict(logreg_sig_clf, logreg, best_alpha, selected_features: pd.DataFrame,
 
     text_results += 'The percentage of misclassified points {:05.2f}% :'.format((1-accuracy_score(y_test, y_pred))*100) + "\n"
 
-    return y_pred, text_results
+    return y_pred, text_results, y_pred_prob
 
 def classification_report(y_test, y_pred, y_pred_prob):
 

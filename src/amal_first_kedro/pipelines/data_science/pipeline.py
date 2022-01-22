@@ -22,7 +22,7 @@ def create_pipeline(**kwargs):
             node(
                 func=predict,
                 inputs=["logreg_sig_clf", "logreg", "best_alpha", "selected_features", "y_train", "y_val", "y_test", "X_train_final", "X_val_final", "X_test_final"],
-                outputs=["y_pred", "logistic_regression_results"],
+                outputs=["y_pred", "logistic_regression_results", "y_pred_prob"],
                 name="predict",
             ),
             node(
