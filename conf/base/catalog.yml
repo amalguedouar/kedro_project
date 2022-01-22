@@ -3,6 +3,9 @@
 # Documentation for this file format can be found in "The Data Catalog"
 # Link: https://kedro.readthedocs.io/en/stable/05_data/01_data_catalog.html
 
+
+# data_engeneering
+
 application_train_data:
   type: pandas.CSVDataSet
   filepath : data/01_raw/application_train.csv
@@ -110,9 +113,35 @@ y_test:
   type: pandas.CSVDataSet
   filepath : data/05_model_input/y_test.csv
 
+# data_science
+
+
+# this is a list containing the column names of the selected fetures 
 selected_features:
   type: pickle.PickleDataSet
   filepath : data/06_models/selected_features.pickle
+
+logistic_regression_model:
+  type: pickle.PickleDataSet
+  filepath : data/06_models/logistic_regression_model.pickle
+
+logistic_regression_results:
+  type: kedro.extras.datasets.text.TextDataSet
+  filepath : data/06_models/logistic_regression_results.txt
+
+cv_auc_score:
+  type: kedro.extras.datasets.matplotlib.MatplotlibWriter
+  filepath : data/06_models/cv_auc_score.png
+
+confusion_matrix_fig:
+  type: kedro.extras.datasets.matplotlib.MatplotlibWriter
+  filepath : data/06_models/confusion_matrix.png
+
+auc_curve:
+  type: kedro.extras.datasets.matplotlib.MatplotlibWriter
+  filepath : data/06_models/auc_curve.png
+
+
 
 
 
