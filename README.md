@@ -1,4 +1,4 @@
-# amal_first_kedro
+# credit_home_prediction
 
 ## Overview
 
