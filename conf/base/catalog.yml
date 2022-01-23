@@ -139,8 +139,11 @@ confusion_matrix_fig:
 
 auc_curve:
   type: kedro.extras.datasets.matplotlib.MatplotlibWriter
-  filepath : data/06_models/auc_curve.png
+  filepath : data/06_models/roc_curve.png
 
+logreg_sig_clf:
+  type: pickle.PickleDataSet
+  filepath : data/06_models/logreg_sig_clf.pickle
 
 
 

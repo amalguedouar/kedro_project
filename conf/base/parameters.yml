@@ -1,2 +1,2 @@
-limit_size : 5000
+limit_size : 50000
 test_size : 0.3
